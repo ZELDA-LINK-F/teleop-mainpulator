@@ -1,0 +1,49 @@
+# ===== Arduino IDE =====
+# Arduino 在你电脑生成的临时文件和编译产物, 不应该进版本库
+*.tmp
+*.bak
+*.ino.zip
+build/
+*.elf
+*.hex
+*.bin
+*.o
+
+# Arduino 每次保存的备份(可能你 IDE 设置了自动保存)
+*.ino~
+
+# Arduino IDE 2.x 的本地缓存
+.cache/
+.arduino/
+
+# ====== 操作系统文件 ======
+# macOS
+.DS_Store
+# Windows
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# ====== 编辑器/IDE ======
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ====== 项目特定的"不进版本库"文件 ======
+# 厂商资料文件夹 (太大且是参考资料, 不是项目代码)
+ESP32-S3 资料/
+
+# 所有 PDF (BOM 清单、参考资料)
+# 想保留某些文档型 PDF 的话, 单独 add 即可
+*.pdf
+
+# ====== 日志和临时调试 ======
+*.log
+*.tmp.txt
+serial_capture.txt
+
+# ====== Python (将来可能用到) ======
+__pycache__/
+*.pyc
+.venv/
