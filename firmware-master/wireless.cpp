@@ -10,7 +10,9 @@
 static uint8_t broadcastMac[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
 static volatile bool sendOk = false;
-static void onSend(const uint8_t* mac, esp_now_send_status_t status) {
+// ESP32 Arduino 库 3.x 把回调签名从 const uint8_t* 改成了 const wifi_tx_info_t*
+// 我们没用到 MAC 地址, 所以参数名改成 tx_info 占位就行
+static void onSend(const wifi_tx_info_t* tx_info, esp_now_send_status_t status) {
   sendOk = (status == ESP_NOW_SEND_SUCCESS);
 }
 
