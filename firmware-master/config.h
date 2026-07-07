@@ -16,6 +16,10 @@ const int NUM_FLEX = 5;
 const int I2C_SDA = 8;
 const int I2C_SCL = 9;
 
+// IMU 硬件开关: 0 = 用 stub (阶段 1, 硬件没到), 1 = 用真实 BNO055 (阶段 3)
+// 切到 1 之前: 装 Adafruit_BNO055 + Adafruit_Sensor 库 (Arduino IDE 库管理器)
+#define IMU_HARDWARE_READY 0
+
 // ====== 通信参数 ======
 // 每 10ms 发一帧 (100Hz), 跟 README 协议一致
 const int SEND_INTERVAL_MS = 10;
