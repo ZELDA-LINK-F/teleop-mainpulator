@@ -6,9 +6,14 @@
 
 // ====== LX-16A 舵机总线 ======
 // 串口 2 (UART2) - 不占用默认 Serial (UART0)
-const int SERVO_TX_PIN = 17;   // ESP32 TX2 -> 转接板 TX
-const int SERVO_DIR_PIN = 4;   // ESP32 GPIO4 -> 转接板 DIR
+// 1kΩ 方案: TX 通过电阻出去, RX 直接接信号线, 单线半双工
+const int SERVO_TX_PIN = 17;   // ESP32-S3 GPIO17 (U1TXD) → 1kΩ → 信号线
+const int SERVO_RX_PIN = 18;   // ESP32-S3 GPIO18 (U1RXD) → 信号线 (直接连)
 const int SERVO_BAUD = 115200;
+
+// DIR_PIN 已弃用 (1kΩ 方案不需要 DIR)
+// 原值: const int SERVO_DIR_PIN = 4; (2026-07-07 删除)
+// GPIO 4 现在空出来了, 可以给 PWM / 第二 UART / 其他用途
 
 // ====== 舵机 ID 分配 (跟 README 一致) ======
 const int SERVO_ID_THUMB  = 1;  // 拇指
