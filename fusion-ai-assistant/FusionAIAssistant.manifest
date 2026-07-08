@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest>
+  <assembly>FusionAIAssistant</assembly>
+  <company>User</company>
+  <description>Mavis AI Assistant for Fusion 360</description>
+  <icon></icon>
+  <supportedProducts>
+    <product>Fusion360</product>
+  </supportedProducts>
+  <runOnStartup>false</runOnStartup>
+</manifest>

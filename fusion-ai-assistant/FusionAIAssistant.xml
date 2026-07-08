@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ApplicationPackage Version="2.0" Name="FusionAIAssistant" MinVersion="2.0.10000">
+  <Company>User</Company>
+  <Description>Mavis AI Assistant for Fusion 360 - input natural language, get 3D models automatically</Description>
+  <Components>
+    <PyComponent Name="FusionAIAssistant" ModuleName="FusionAIAssistant" />
+  </Components>
+</ApplicationPackage>

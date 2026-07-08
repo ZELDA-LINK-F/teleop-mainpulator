@@ -1,0 +1,6 @@
+{
+  "_comment": "Mavis AI 助手配置文件。mavis_session_id 改成你自己的 Mavis session ID（在 Mavis Code 顶部的会话信息里能看到）。",
+  "mavis_session_id": "mvs_c70a4250444f46198bac5f16b758b469",
+  "auto_notify": true,
+  "log_level": "info"
+}

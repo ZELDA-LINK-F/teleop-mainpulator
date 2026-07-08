@@ -50,3 +50,7 @@ __pycache__/
 
 # 临时上传的图片 (微信等)
 微信图片_*.jpg
+
+# ====== Fusion 360 AI Assistant 插件运行时通信队列 ======
+# Fusion 插件跟 Mavis 通信用的临时 JSON, 运行时生成, 不该进版本库
+fusion-ai-assistant/queue/
