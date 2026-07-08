@@ -11,6 +11,7 @@
 SensorFrame frame;
 uint16_t seq = 0;
 unsigned long lastSend = 0;
+unsigned long lastStatsPrint = 0;  // P1: 定期打印 send 统计
 
 // IMU 还没到, 用单位四元数占位 (无旋转)
 static float fakeQuat[4] = {1.0f, 0.0f, 0.0f, 0.0f};
@@ -45,6 +46,25 @@ void loop() {
     wirelessSendFrame(frame);
     if (seq % 10 == 0) {  // 每 10 帧打印一次, 不刷屏
       framePrint(frame);
+    }
+  }
+
+  // ====== P1: 每秒打印一次 send 统计 ======
+  // 看 sendOk / sendFail 比例就知道通信质量
+  // 100% 成功 = 健康; 大量 fail = slave 没开机 / 距离太远 / 干扰
+  if (millis() - lastStatsPrint >= 1000) {
+    lastStatsPrint = millis();
+    uint32_t ok, fail;
+    wirelessGetSendStats(ok, fail);
+    uint32_t total = ok + fail;
+    if (total > 0) {
+      Serial.print("[SEND STATS] ok=");
+      Serial.print(ok);
+      Serial.print(" fail=");
+      Serial.print(fail);
+      Serial.print(" rate=");
+      Serial.print((ok * 100) / total);
+      Serial.println("%");
     }
   }
 }

@@ -10,6 +10,7 @@
 
 SensorFrame rxFrame;
 unsigned long lastPrint = 0;
+unsigned long lastStatsPrint = 0;  // P1: 定期打印 rx 统计
 
 void setup() {
   Serial.begin(115200);
@@ -54,6 +55,24 @@ void loop() {
       Serial.print("[MAIN] WARN: no data for ");
       Serial.print(millis() - lastRx);
       Serial.println("ms");
+    }
+  }
+
+  // ====== P1: 每秒打印一次 rx 统计 ======
+  // 配合 master 端的 send stats, 能算出双向丢包率
+  if (millis() - lastStatsPrint >= 1000) {
+    lastStatsPrint = millis();
+    uint32_t rx, lost;
+    wirelessGetRxStats(rx, lost);
+    if (rx > 0) {
+      uint32_t total = rx + lost;
+      Serial.print("[RX STATS] rx=");
+      Serial.print(rx);
+      Serial.print(" lost=");
+      Serial.print(lost);
+      Serial.print(" rate=");
+      Serial.print((rx * 100) / total);
+      Serial.println("%");
     }
   }
 }
