@@ -12,6 +12,12 @@ SensorFrame rxFrame;
 unsigned long lastPrint = 0;
 unsigned long lastStatsPrint = 0;  // P1: 定期打印 rx 统计
 
+// ====== P1: 断线安全位状态机 ======
+// safeModeActive: 当前是否处于"已触发安全位"状态
+// 关键: 只在状态切换时触发一次 servoSetSafe, 不是每帧都调
+// (不然没数据时每帧都发 LX-16A 命令, 总线堵死)
+static bool safeModeActive = false;
+
 void setup() {
   Serial.begin(115200);
   delay(1000);
@@ -46,15 +52,27 @@ void loop() {
     }
   }
 
-  // 超时检测
+  // ====== P1: 断线安全位状态机 ======
+  // 通信断了超过 SAFE_POSITION_TIMEOUT_MS → 回安全姿势
+  // 通信恢复 → 重置状态, 下次断了再触发
   unsigned long lastRx = wirelessGetLastReceiveTime();
-  if (lastRx > 0 && millis() - lastRx > WIRELESS_TIMEOUT_MS) {
-    static unsigned long lastWarn = 0;
-    if (millis() - lastWarn > 1000) {
-      lastWarn = millis();
-      Serial.print("[MAIN] WARN: no data for ");
+  if (lastRx > 0 && millis() - lastRx > SAFE_POSITION_TIMEOUT_MS) {
+    // 通信断了
+    if (!safeModeActive) {
+      // 状态切换: 正常 → 断线, 触发一次安全位
+      safeModeActive = true;
+      Serial.print("[MAIN] WARN: comm lost for ");
       Serial.print(millis() - lastRx);
-      Serial.println("ms");
+      Serial.println("ms, returning servos to SAFE position");
+      servoSetSafe();
+    }
+    // 如果已经在 safe 状态, 啥都不做 (避免每帧重复发舵机命令)
+  } else {
+    // 通信正常
+    if (safeModeActive) {
+      // 状态切换: 断线 → 恢复
+      safeModeActive = false;
+      Serial.println("[MAIN] INFO: comm recovered, resuming normal control");
     }
   }
 

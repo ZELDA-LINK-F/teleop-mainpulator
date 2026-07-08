@@ -32,4 +32,14 @@ const int SERVO_ANGLE_MAX = 1000;  // 最大弯曲 (LX-16A 单位 0-1000 = 0-240
 // ====== 通信参数 ======
 const int WIRELESS_TIMEOUT_MS = 100;  // 100ms 没收到新数据认为断连
 
+// ====== P1: 断线安全位 ======
+// 通信断了这么久, 舵机自动回安全姿势 (全 0 = 张开手)
+// 300ms = 丢 30 帧 @ 100Hz, 足够排除偶发抖动又不至于反应慢
+const unsigned long SAFE_POSITION_TIMEOUT_MS = 300;
+
+// 安全姿势: 6 个舵机归一化值 (0.0 = 完全放松/张开)
+// LX-16A 默认角度 0 = 放松位, 所以全 0 就是"张开手"姿势
+// 阶段 1 用这个最保守的姿势; 阶段 3 拿到 IMU 后可以改成"手掌朝上"
+const float SERVO_SAFE_NORM[NUM_SERVOS] = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+
 #endif

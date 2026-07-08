@@ -131,6 +131,13 @@ void servoSetAll(const float normalized[NUM_SERVOS]) {
   }
 }
 
+// ====== P1: 回安全姿势 ======
+// 通信断了的时候让舵机回安全姿势, 避免失控 (比如卡在握紧状态)
+// 实现上就是复用 servoSetAll, 传 SERVO_SAFE_NORM (在 config.h 里定义)
+void servoSetSafe() {
+  servoSetAll(SERVO_SAFE_NORM);
+}
+
 void servoPrintStatus() {
   Serial.print("[SERVO STATUS] ");
   for (int i = 0; i < NUM_SERVOS; i++) {
