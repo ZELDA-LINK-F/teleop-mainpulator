@@ -31,6 +31,10 @@ static void onSend(const wifi_tx_info_t* tx_info, esp_now_send_status_t status) 
 
 bool wirelessSetup() {
   WiFi.mode(WIFI_STA);
+  // 给 STA 模式一点时间生效, 否则 WiFi.macAddress() 在 ESP32-S3 + Arduino 3.x
+  // 上会返回 00:00:00:00:00:00 (今天验证时两板都重现, 已确认是库时序问题)
+  // 不影响 broadcast 发送, 但阶段 2 改 peer-to-peer 时必须能读出真实 MAC
+  delay(100);
   // 打印自己的 MAC, 后面配置 peer 时要用
   Serial.print("[WIRELESS] My MAC = ");
   Serial.println(WiFi.macAddress());

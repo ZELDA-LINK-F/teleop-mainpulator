@@ -40,7 +40,14 @@ static void onReceive(const esp_now_recv_info_t* info, const uint8_t* data, int 
         // 跳跃! 算丢失了多少帧
         // volatile + += 也 deprecated, 显式写
         uint16_t gap = (uint16_t)(seq - expected);  // wrap-safe 减法
-        seqLostCount = seqLostCount + gap;
+        // 保护: gap > 100 = 大概率是 master 复位 (seq wrap 到 0)
+        //  100Hz 下连续丢 100 帧 = 1 秒, 已经触发了断线安全位 (300ms)
+        //  真正的"连续丢包"gap 不会超过 30 (300ms 触发前就会断流)
+        //  所以 gap > 100 视为 master 重启, 不计入 lost
+        if (gap <= 100) {
+          seqLostCount = seqLostCount + gap;
+        }
+        // 不打日志, 不影响主流程; 下一帧自然按新 seq 建立基准
       }
     }
     seqLastSeen = seq;
@@ -57,6 +64,9 @@ static void onReceive(const esp_now_recv_info_t* info, const uint8_t* data, int 
 
 bool wirelessSetup() {
   WiFi.mode(WIFI_STA);
+  // 给 STA 模式一点时间生效, 否则 WiFi.macAddress() 在 ESP32-S3 + Arduino 3.x
+  // 上会返回 00:00:00:00:00:00 (跟 master 同一原因)
+  delay(100);
   Serial.print("[WIRELESS] My MAC = ");
   Serial.println(WiFi.macAddress());
 
