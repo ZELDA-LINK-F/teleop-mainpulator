@@ -44,7 +44,7 @@ void loop() {
     frameSetQuat(frame, fakeQuat);        // ← IMU 还没到, 暂时用占位
     frame.seq = seq++;
     wirelessSendFrame(frame);
-    if (seq % 10 == 0) {  // 每 10 帧打印一次, 不刷屏
+    if (seq % 100 == 0) {  // 每秒打印一次 (100Hz / 100 = 1次/秒)
       framePrint(frame);
     }
   }

@@ -9,8 +9,13 @@
 
 bool servoSetup();
 
+// 给所有舵机上电 (LOAD=1), servoSetup() 会自动调一次
+// 断线恢复后也可以单独调用
+void servoPowerOn();
+
 // 设置单个舵机角度 (0.0-1.0 归一化, 内部映射到 LX-16A 角度范围)
-void servoSetNormalized(int servoId, float normalized);
+// timeMs: 1~30000=匀速转动到目标的时间 (默认 50ms)
+void servoSetNormalized(int servoId, float normalized, uint16_t timeMs = 50);
 
 // 同时设置 5 指 + 1 腕, normalized 长度 = 6
 // 顺序: 拇指, 食指, 中指, 无名指, 小指, 腕
