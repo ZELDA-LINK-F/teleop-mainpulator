@@ -33,9 +33,22 @@ void setup() {
 
 void loop() {
   // ====== 读真实弯曲传感器 (5 个) ======
-  // flexSensorReadNormalized 会自动用 config.h 的校准值归一化到 [0, 1]
   float flex[NUM_FLEX];
   flexSensorReadNormalized(flex);
+
+  // 每秒打印一次原始 ADC 值 (校准用)
+  static unsigned long lastRawPrint = 0;
+  if (millis() - lastRawPrint >= 1000) {
+    lastRawPrint = millis();
+    uint16_t raw[NUM_FLEX];
+    flexSensorReadRaw(raw);
+    Serial.print("[RAW ADC] ");
+    for (int i = 0; i < NUM_FLEX; i++) {
+      Serial.print(raw[i]);
+      Serial.print(i < NUM_FLEX - 1 ? "," : "");
+    }
+    Serial.println();
+  }
 
   if (millis() - lastSend >= SEND_INTERVAL_MS) {
     lastSend = millis();
