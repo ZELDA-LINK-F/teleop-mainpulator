@@ -24,7 +24,24 @@ static volatile uint32_t seqLostCount = 0;  // 因 seq 跳跃推算的丢帧数
 // 跟 master 端 onSend 是同一个 ESP-IDF v5 升级带来的变化 (2026-06-28 踩过坑)
 // 我们不用 MAC, 所以参数名改成 info 占位就行, 函数体不变
 // 真要拿发送方 MAC 用 info->src_addr (uint8_t[6])
+static volatile bool peerPending = false;
+static uint8_t pendingPeerMac[6];
+
 static void onReceive(const esp_now_recv_info_t* info, const uint8_t* data, int len) {
+  // ====== 记录 master MAC (稍后在主循环注册) ======
+  if (!peerPending && info != nullptr && info->src_addr != nullptr) {
+    uint8_t myMac[6];
+    WiFi.macAddress(myMac);
+    bool isSelf = true;
+    for (int i = 0; i < 6; i++) {
+      if (info->src_addr[i] != myMac[i]) { isSelf = false; break; }
+    }
+    if (!isSelf) {
+      memcpy(pendingPeerMac, info->src_addr, 6);
+      peerPending = true;
+    }
+  }
+
   if (len == sizeof(SensorFrame)) {
     // 先复制数据 (可能后面 memcpy 会跟 loop 读 latest 冲突)
     SensorFrame tmp;
@@ -80,6 +97,25 @@ bool wirelessSetup() {
 }
 
 bool wirelessGetLatest(SensorFrame& out) {
+  // 在主循环上下文安全地注册 peer (回调里不能调 esp_now_add_peer)
+  static bool peerRegistered = false;
+  if (!peerRegistered && peerPending) {
+    peerPending = false;
+    esp_now_peer_info_t peer = {};
+    memcpy(peer.peer_addr, pendingPeerMac, 6);
+    peer.channel = 0;
+    peer.encrypt = false;
+    if (esp_now_add_peer(&peer) == ESP_OK) {
+      Serial.print("[WIRELESS] Registered master peer: ");
+      for (int i = 0; i < 6; i++) {
+        if (i > 0) Serial.print(":");
+        Serial.print(pendingPeerMac[i], HEX);
+      }
+      Serial.println();
+      peerRegistered = true;
+    }
+  }
+
   if (!hasNew) return false;
   out = latest;
   hasNew = false;

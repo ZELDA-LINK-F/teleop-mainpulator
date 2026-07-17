@@ -2,14 +2,13 @@
 // ESP-NOW 发送实现
 
 #include "wireless.h"
+#include "config.h"
 #include <esp_now.h>
 #include <WiFi.h>
 
-// 临时用 broadcast, 调试阶段够用
-// TODO: 改成 peer-to-peer (需要 slave 板子的 MAC)
-static uint8_t broadcastMac[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
-
-// ====== 发送统计 (P1 改进) ======
+// SLAVE_MAC 定义在 config.h, 默认是 broadcast (FF:FF...) = 阶段 1 兼容
+// 改成 slave 真实 MAC 后自动升级为 peer-to-peer
+// 发送统计 (P1 改进)
 // volatile 是必须的: onSend 回调跟 loop 在同一核但异步触发, 主循环读这个值要 volatile
 // 单核 ESP32 上 uint32_t 读写是原子的, 不会被撕成两半
 // 注意: 回调是异步的, stats 反映"已确认的部分", 不是"全部发出去的"
@@ -46,19 +45,26 @@ bool wirelessSetup() {
   esp_now_register_send_cb(onSend);
 
   esp_now_peer_info_t peer = {};
-  memcpy(peer.peer_addr, broadcastMac, 6);
+  memcpy(peer.peer_addr, SLAVE_MAC, 6);
   peer.channel = 0;
   peer.encrypt = false;
   if (esp_now_add_peer(&peer) != ESP_OK) {
-    Serial.println("[WIRELESS] add_peer failed");
+    Serial.println("[WIRELESS] add_peer failed (SLAVE_MAC may be wrong or not updated from broadcast)");
     return false;
   }
-  Serial.println("[WIRELESS] ESP-NOW init OK (broadcast mode)");
+  // 打印当前模式
+  bool isBroadcast = true;
+  for (int i = 0; i < 6; i++) {
+    if (SLAVE_MAC[i] != 0xFF) { isBroadcast = false; break; }
+  }
+  Serial.print("[WIRELESS] ESP-NOW init OK (");
+  Serial.print(isBroadcast ? "broadcast" : "peer-to-peer");
+  Serial.println(" mode)");
   return true;
 }
 
 bool wirelessSendFrame(const SensorFrame& f) {
-  esp_err_t r = esp_now_send(broadcastMac, (uint8_t*)&f, sizeof(f));
+  esp_err_t r = esp_now_send(SLAVE_MAC, (uint8_t*)&f, sizeof(f));
   return (r == ESP_OK);
 }
 

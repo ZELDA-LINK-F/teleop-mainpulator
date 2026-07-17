@@ -15,7 +15,6 @@ bool wirelessSendFrame(const SensorFrame& f);
 void wirelessGetSendStats(uint32_t& ok, uint32_t& fail);
 void wirelessResetSendStats();
 
-// TODO: 把 broadcast 改成 peer (用对方板子的真实 MAC)
-// uint8_t slaveMac[6] = {0xXX, 0xXX, 0xXX, 0xXX, 0xXX, 0xXX};
+// SLAVE_MAC 定义在 config.h, 默认 broadcast, 改成真实 MAC 即升级 peer-to-peer
 
 #endif

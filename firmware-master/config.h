@@ -24,6 +24,13 @@ const int I2C_SCL = 9;
 // 每 10ms 发一帧 (100Hz), 跟 README 协议一致
 const int SEND_INTERVAL_MS = 10;
 
+// ====== ESP-NOW 对端 MAC ======
+// 从 slave 板子串口输出抄过来 (slave 打印 "[WIRELESS] My MAC = ...")
+// 冒号分隔 → 转成 6 字节数组: {0xXX, 0xXX, 0xXX, 0xXX, 0xXX, 0xXX}
+// 默认值是广播地址, 改成 slave 真实 MAC 后自动升级为 peer-to-peer
+// 阶段 2 必填, 不填就是广播模式 (阶段 1 的兼容行为)
+const uint8_t SLAVE_MAC[6] = {0x28, 0x84, 0x85, 0x48, 0x3F, 0x78};
+
 // ====== 校准参数 (2026-06-28 实测) ======
 // 硬件: SpectraFlex FLX 55mm + 47kΩ 上拉电阻 + ESP32 GPIO 1 (3.3V 参考)
 // 弯曲传感器平直时的 ADC 值 (2026-07-16 实测)
